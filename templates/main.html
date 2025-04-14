@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Molecular Thesaurus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+</head>
+<body background="{{ url_for('static', filename='background.png') }}">
+    <h1>
+        Molecular
+        <img src="{{ url_for('static', filename='icon.png') }}" alt="Molecular Thesaurus Icon" class="icon">
+        Thesaurus
+    </h1>
+    <h2>Welcome to the Molecular Thesaurus!</h2>
+    <h2>This website can tell you the name of a molecule and help you find similar ones.</h2>
+    <h3>To get started, please enter a molecule name (IUPAC or common), ChEMBL ID, or SMILES code:</h3>
+    <form id="textSearch" action="/molecules" method="get" autocomplete="on">
+        <input type="text" name="molecule_id" placeholder="Molecule ID">
+        <input class="submit" type="submit" value="Search">
+    </form>
+    <h3>Or draw a molecule!</h3>
+    <iframe id="ketcherFrame" class="doodle" src="{{ url_for('static', filename='ketcher/index.html') }}"></iframe>
+    <form id="drawSearch" action="/molecules" method="get">
+        <input type="hidden" name="molecule_id" id="drawnMolecule">
+        <button class="bigSubmit" type="button" onclick="submitDrawnMolecule()">Search Drawn Molecule</button>
+    </form>
+    <script>
+    async function submitDrawnMolecule() {
+        const iframe = document.getElementById('ketcherFrame');
+        const ketcherWindow = iframe.contentWindow;
+
+        try {
+            // Calls the Ketcher API in the iframe
+            const smiles = await ketcherWindow.ketcher.getSmiles();
+            document.getElementById('drawnMolecule').value = smiles;
+            document.getElementById('drawSearch').submit();
+        } catch (error) {
+            alert("Please draw a structure.");
+            console.error(error);
+        }
+    }
+    </script>
+</body>
+</html>

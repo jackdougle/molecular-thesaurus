@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Molecular Thesaurus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+</head>
+<body background="{{ url_for('static', filename='background.png') }}">
+    <button type="button" class="button-logo" onclick="window.location.href='/'">
+        Molecular 
+        <img src="{{ url_for('static', filename='icon.png') }}" alt="Molecular Thesaurus Icon" class="icon">
+        Thesaurus
+    </button>
+    <h4>Molecule Information</h4>
+    <div class="image-container">
+        <img src="{{ url_for('static', filename=image) }}" alt="No molecule" class="molecule-image">
+        <span class="caption">{{ caption }}</span>
+    </div>
+    <p><strong>IUPAC Name:</strong> {{ name }}</p>
+    <p><strong>Formula:</strong> {{ formula }}</p>
+    <p><strong>Molecular Weight:</strong> {{ weight }}</p>
+    <p><strong>ChEMBL ID:</strong> {{ id }}</p>
+    <button type="button" class="button-return" onclick="window.location.href='/'">Search for another molecule</button>
+    <form action="/molecules" method="get">
+    <input type="hidden" name="molecule_id" value="{{ molecule_id }}">
+    <label for="property" style="font-size: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bolder;">Find similar molecules based on:</label>
+    <select class="select" name="property" id="property">
+        <option class="placeholder"></option>
+        <option value="mw">Molecular Weight</option>
+        <option value="logp">LogP</option>
+        <option value="tpsa">Topological Polar Surface Area</option>
+        <option value="formula">Molecular Formula</option>
+        <option value="structure">Canonical SMILES</option>
+        <option value="mechanism">Mechanism of Action</option>
+    </select>
+    <button class="submit" type="submit">Go</button>
+</form>
+</body>
+</html>
