@@ -65,6 +65,9 @@ h2 {
     font-size: 18px;
     font-weight: 850;
     padding: 10px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 h3 {
@@ -72,6 +75,9 @@ h3 {
     text-align: center;
     font-size: 19px;
     font-weight: bold;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 h4 {
@@ -81,6 +87,14 @@ h4 {
     margin-top: 10px;
     margin-bottom: 15px;
     padding: 10px;
+}
+
+h5 {
+    font-size: 20px;
+    font-weight: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 input[type="text"] {
@@ -168,8 +182,8 @@ input[type="text"]:focus {
     margin: 0 auto;
     margin-top: 30px;
     margin-bottom: 30px;
-    width: 640px;
-    height: 640px;
+    width: 700px;
+    height: 700px;
     border-width: 13px;
     border-radius: 17px;
     border-style: groove;

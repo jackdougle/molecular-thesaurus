@@ -37,10 +37,6 @@ def get_info():
     cid, name = get_pubchem_name(smiles)
     chembl_id = get_chembl_id(smiles)
 
-    if name.lower() == "formaldehyde": name = "Methanal"  # PubChem returns Formaldehyde for IUPAC name
-    elif name.lower() == "acetaldehyde": name = "Ethanal" # PubChem returns Acetaldehyde for IUPAC name
-    elif name.lower() == "benzaldehyde": name = "Benzenecarbaldehyde"  # PubChem returns Benzaldehyde for IUPAC name
-
     # Put image in static folder so it's usable by Flask
     img_path = os.path.join('static', 'mol.png')
     Draw.MolToFile(mol, img_path)
@@ -160,26 +156,26 @@ def get_pubchem_name(smiles):
 
     if cidResponse.status_code != 200:
         print("Error fetching CID:", cidResponse.status_code, cidResponse.text)
-        return "No molecule found"
+        return None, None
 
     try:
         cid = cidResponse.json()["IdentifierList"]["CID"][0]
     except (KeyError, IndexError):
-        return "No molecule found"
+        return None, None
 
     nameURL = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{cid}/property/IUPACName/JSON"
     nameResponse = requests.get(nameURL)
 
     if nameResponse.status_code != 200:
         print("Error getting name:", nameResponse.status_code, nameResponse.text)
-        return "Name not available"
+        return cid, "Name not available"
 
     # Even with successful response, many output names are not IUPAC (i. e. aldehydes)
     try:
         name = nameResponse.json()["PropertyTable"]["Properties"][0]["IUPACName"]
         return cid, name.capitalize()
     except (KeyError, IndexError):
-        return "Name not found"
+        return cid, "Name not found"
     
 def get_mechanism(id):
     url = f"https://www.ebi.ac.uk/chembl/api/data/mechanism.json?molecule_chembl_id={id}"
@@ -198,7 +194,11 @@ def get3D(mol):
     mol = Chem.AddHs(mol)
 
     AllChem.EmbedMolecule(mol)
-    AllChem.UFFOptimizeMolecule(mol)
+
+    try:
+        AllChem.UFFOptimizeMolecule(mol)
+    except:
+        print("UFF optimization failed")
 
     return Chem.MolToMolBlock(mol)
 
