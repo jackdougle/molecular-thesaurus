@@ -16,32 +16,34 @@
     <h4>IUPAC Molecule: {{ name }}</h4>
     <h5><strong>SMILES Code:</strong> {{ smiles }}</h5>
     <div class="flexbox">
-        <div class="image-box">
-            <img src="{{ url_for('static', filename=image) }}" alt="No molecule" class="molecule-image">
+        <div class = "model-box">
+            <div id="viewer"></div>
             {% if caption %}
-            <span class="caption">RDKit</span>
+            <span class="caption">3DMol.js</span>
             {% endif %}
         </div>
-        <div class="info-box">
-            <p><strong>Molecular Formula:</strong> {{ formula }}</p>
-            <p><strong>Molecular Weight:</strong> {{ weight }}</p>
-            <p><strong>LogP (Hydrophobicity):</strong> {{ logP }}</p>
-            {% if tpsa %}
-            <p><strong>Topological Polar Surface Area:</strong> {{ tpsa }} Å²</p>
-            {% else %}
-            <p><strong>Topological Polar Surface Area:</strong> None</p>
-            {% endif %}
-            <p><strong>Mechanism of Action:</strong> {{ mech }}</p>
-            <p><strong>PubChem CID:</strong> {{ cid }}</p>
-            <p><strong>ChEMBL ID:</strong> {{ chembl_id }}</p>
-            <button type="button" class="button-return" onclick="window.location.href='/'">Search for another molecule</button>
+        <div class="image-and-info-box">
+            <div class="info-box">
+                <p><strong>Molecular Formula:</strong> {{ formula }}</p>
+                <p><strong>Molecular Weight:</strong> {{ weight }}</p>
+                <p><strong>LogP (Hydrophobicity):</strong> {{ logP }}</p>
+                {% if tpsa %}
+                <p><strong>Topological Polar Surface Area:</strong> {{ tpsa }} Å²</p>
+                {% else %}
+                <p><strong>Topological Polar Surface Area:</strong> None</p>
+                {% endif %}
+                <p><strong>Mechanism of Action:</strong> {{ mech }}</p>
+                <p><strong>PubChem CID:</strong> {{ cid }}</p>
+                <p><strong>ChEMBL ID:</strong> {{ chembl_id }}</p>
+                <button type="button" class="button-return" onclick="window.location.href='/'">Search for another molecule</button>
+            </div>
+            <div class="image-box">
+                <img src="{{ url_for('static', filename=image) }}" alt="No molecule" class="molecule-image">
+                {% if caption %}
+                <span class="caption">RDKit</span>
+                {% endif %}
+            </div>
         </div>
-    </div>
-    <div class = "model-box">
-        <div id="viewer"></div>
-        {% if caption %}
-        <span class="caption">3DMol.js</span>
-        {% endif %}
     </div>
     <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
     <script>
@@ -52,9 +54,10 @@
         viewer.zoomTo();
         viewer.render();
     </script>
+    </h5><strong style="color: red; font-size: 25px">--WIP | Will be finished within the week--</strong></h5>
     <form action="/molecules" method="get">
-        <input type="hidden" name="molecule_id" value="{{ molecule_id }}">
-        <label for="property" style="font-size: 20px; font-family: 'Segoe UI', Tahoma; font-weight: bolder;">Find similar molecules based on:</label>
+        <input type="hidden" name="molecule_id" value="{{ smiles }}">
+        <label for="property" style="font-size: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bolder;">Find similar molecules based on:</label>
         <select class="select" name="property" id="property">
             <option class="placeholder"></option>
             <option value="formula">Molecular Formula</option>
@@ -68,7 +71,5 @@
         </select>
         <button class="submit" type="submit">Go</button>
     </form>
-    <div class="sim_mols">
-    </div>
 </body>
 </html>

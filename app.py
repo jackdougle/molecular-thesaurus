@@ -9,6 +9,7 @@ from rdkit.Chem import Draw
 from rdkit.Chem import inchi
 from rdkit.Chem import rdMolDescriptors
 import math
+import urllib.parse
 
 app = Flask(__name__)
 
@@ -19,12 +20,12 @@ def home():
 @app.route('/molecules', methods=['GET'])
 def get_info():
     inpt_mol = request.args.get('molecule_id')
+    property = request.args.get('property')
 
     if inpt_mol is None:
         return "Please enter a valid molecule ID."
     
     smiles = get_smiles(inpt_mol)
-    print(smiles)
 
     if smiles:
         mol = Chem.MolFromSmiles(smiles)
@@ -51,36 +52,34 @@ def get_info():
     mech = get_mechanism(id)
     mol3D = get3D(mol)
 
-    print("Here")
+    # WIP code for getting similar molecules
+    if property != None:
+        print(f"Finding similar molecules of property {property}...")
+        new_smiles = find_similar_molecules(mol, property, formula, smiles, chembl_id)
+        new_names = []
+        for i in range(len(new_smiles)):
+            new_name = get_pubchem_name(new_smiles[i])
+            new_names.append(new_name)
+            new_mol = Chem.MolFromSmiles(new_smiles[i])
+            new_img_path = os.path.join('static', f'mol{i}.png')
+            Draw.MolToFile(new_mol, new_img_path)
+        return render_template('expanded_molecule.html', image='mol.png', name=name, smiles=smiles, chembl_id=chembl_id, \
+                               cid=cid, formula=formula, weight=mw, logP=logP, tpsa=tpsa, mech=mech, caption="go", \
+                                mol3D=mol3D, new_smiles=new_smiles, new_names=new_names)
+
     return render_template('molecule.html', image='mol.png', name=name, smiles=smiles, chembl_id=chembl_id, cid=cid, \
                            formula=formula, weight=mw, logP=logP, tpsa=tpsa, mech=mech, caption="go", \
                             mol3D=mol3D, WIP=True)
 
-    # WIP code for getting similar molecules
-    if property != None:
-        new_smiles = find_similar_molecules(mol, property, formula, smiles, chembl_id)
-        new_names = []
-        for smile in new_smiles: 
-            print(smile)
-            print(get_pubchem_name(smile))
-            #new_names.append(name)
-            #print(name)
-        return render_template('expanded_molecule.html', image='mol.png', name=name, smiles=smiles, chembl_id=chembl_id, cid=cid, \
-                               formula=formula, weight=mw, logP=logP, tpsa=tpsa, mech=mech, caption="go", \
-                                mol3D=mol3D, new_smiles=new_smiles, new_names=new_names)
-
 def get_smiles(inpt_mol):
     # Only spend time on ChEMBL ID if a ChEMBL ID is entered
     if len(inpt_mol) > 6 and inpt_mol[:6].lower() == "chembl":
-        print("Trying ChEMBL ID...")
         smiles = try_chembl(inpt_mol)
         if smiles: return smiles
 
-    print("Trying SMILES code...")
     if try_smiles(inpt_mol):
         return inpt_mol
 
-    print("Trying IUPAC name...")
     smiles = try_iupac(inpt_mol)
     if smiles: return smiles
 
@@ -137,7 +136,6 @@ def get_chembl_id(smiles):
         return "Invalid molecule"
     
     inchiKey = inchi.MolToInchiKey(mol)
-    print(inchiKey)
     url = f"https://www.ebi.ac.uk/chembl/api/data/molecule/search.json?q={inchiKey}"
     response = requests.get(url)
     if response.status_code != 200:
@@ -213,8 +211,10 @@ def find_similar_molecules(mol, property, formula, smiles, chembl_id):
     elif property == "structure":
         cid_list = get_similar_structure(smiles, 85, 15)
     elif property == "mw":
+        print("Finding MW")
         mw = Chem.Descriptors.MolWt(mol)
         chembl_list = get_similar_mw(mw, 10)
+        print(len(chembl_list))
     elif property == "logp":
         logp = Crippen.MolLogP(mol)
         chembl_list = get_similar_logp(logp, 0.3)
@@ -227,6 +227,7 @@ def find_similar_molecules(mol, property, formula, smiles, chembl_id):
         chembl_list = get_similar_mechanism(chembl_id)
         
     if chembl_list != [] and smiles_list == []:
+        print("Found ChEMBL IDs")
         for id in chembl_list:
             smile = try_chembl(id)
             if smile:
@@ -238,9 +239,8 @@ def find_similar_molecules(mol, property, formula, smiles, chembl_id):
                 smiles_list.append(smile)
     elif smiles_list != []:
         if len(smiles_list) > 5: smiles_list = smiles_list[:5]
-        return smiles_list
-    else:
-        return ["Trouble finding similar molecules."]
+    
+    return smiles_list[:5]  # Limit to first 5 similar molecules
 
 def get_similar_formula(formula):
     print(f"Searching ChEMBL DB for formula: {formula}")
@@ -260,7 +260,9 @@ def get_similar_formula(formula):
         return None
     
 def get_similar_structure(smiles, min_similarity, cap):
-    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/similarity/smiles/{smiles}/JSON?Threshold={min_similarity}&MaxRecords={cap}"
+    print(f"Searching PubChem DB for structure: {smiles}")
+    formatted_smiles = urllib.parse.quote(smiles)
+    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/similarity/smiles/{formatted_smiles}/JSON?Threshold={min_similarity}&MaxRecords={cap}"
     response = requests.get(url)
 
     if response.status_code != 200:
@@ -275,6 +277,7 @@ def get_similar_structure(smiles, min_similarity, cap):
         return None
     
 def get_similar_mw(mw, delta):
+    print(f"Searching ChEMBL DB for MW: {mw}")
     min_mw = mw - delta
     max_mw = mw + delta
 
@@ -293,6 +296,7 @@ def get_similar_mw(mw, delta):
         return None
 
 def get_similar_logp(logp, delta):
+    print(f"Searching ChEMBL DB for LogP: {logp}")
     min_logp = logp - delta
     max_logp = logp + delta
 
@@ -311,6 +315,7 @@ def get_similar_logp(logp, delta):
         return None
     
 def get_similar_tpsa(mol, delta):
+    print(f"Searching ChEMBL DB for TPSA: {mol}")
     tpsa = Chem.rdMolDescriptors.CalcTPSA(mol)
     min_tpsa = tpsa - delta
     max_tpsa = tpsa + delta
@@ -332,6 +337,7 @@ def get_similar_tpsa(mol, delta):
 
 
 def get_similar_mechanism(chembl_id):
+    print(f"Searching ChEMBL DB for mechanism of action: {chembl_id}")
     url = f"https://www.ebi.ac.uk/chembl/api/data/mechanism.json?molecule_chembl_id={chembl_id}"
     response = requests.get(url)
     if response.status_code != 200:

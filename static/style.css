@@ -85,11 +85,11 @@ h4 {
     font-size: 24px;
     font-weight: 900;
     margin-top: 10px;
-    margin-bottom: 15px;
     padding: 10px;
 }
 
 h5 {
+    margin-top: -15px;
     font-size: 20px;
     font-weight: normal;
     word-wrap: break-word;
@@ -137,7 +137,7 @@ input[type="text"]:focus {
     justify-content: center;
     gap: 40px;
     margin-top: 30px;
-    margin-left: -10px;
+    margin-left: -100px;
 }
 
 .image-box {
@@ -160,6 +160,8 @@ input[type="text"]:focus {
 .info-box {
     text-align: left;
     font-family: 'Segoe UI', Tahoma, Geneva;
+    margin-top: -10px;
+    margin-bottom: 18px;
 }
 
 .caption {
@@ -175,12 +177,7 @@ input[type="text"]:focus {
 }
 
 .model-box {
-    display: flex;
     position: relative;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto;
-    margin-top: 30px;
     margin-bottom: 30px;
     width: 700px;
     height: 700px;
