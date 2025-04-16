@@ -12,7 +12,7 @@
         <img src="{{ url_for('static', filename='icon.png') }}" alt="Molecular Thesaurus Icon" class="icon">
         Thesaurus
     </h1>
-    <h2>Welcome to the Molecular Thesaurus!</h2>
+    <h3>Welcome to the Molecular Thesaurus!</h3>
     <h2>This website can tell you the name of a molecule and help you find similar ones.</h2>
     <h3>To get started, please enter a molecule name (IUPAC or common), ChEMBL ID, or SMILES code:</h3>
     <form id="textSearch" action="/molecules" method="get" autocomplete="on">
@@ -20,7 +20,10 @@
         <input class="submit" type="submit" value="Search">
     </form>
     <h3>Or draw a molecule!</h3>
-    <iframe id="ketcherFrame" class="doodle" src="{{ url_for('static', filename='ketcher/index.html') }}"></iframe>
+    <div class="doodle-box">
+        <iframe id="ketcherFrame" class="doodle" src="{{ url_for('static', filename='ketcher/index.html') }}"></iframe>
+        <span class="caption" id="Ketcher">Ketcher</span>
+    </div>
     <form id="drawSearch" action="/molecules" method="get">
         <input type="hidden" name="molecule_id" id="drawnMolecule">
         <button class="bigSubmit" type="button" onclick="submitDrawnMolecule()">Search Drawn Molecule</button>
