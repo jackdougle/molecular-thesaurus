@@ -72,15 +72,20 @@
     </form>
     <h4>Molecular matches from ChEMBL:</h4>
     <div class="flexbox2" id="sim-mols">
-        {% for i in range(8) %}
+        {% if len > 0 %}
+        {% for i in range(len) %}
         <div class="sim-mol">
             <a href="/molecules?molecule_id={{ new_smiles[i] | urlencode }}">
                 <img src="{{ url_for('static', filename=new_imgs[i]) }}" class="mol-image">
             </a>
             <h6><strong>{{ new_names[i] }}</strong></h6>
-            <p><strong>SMILES Code:</strong> {{ new_smiles[i] }}</p>
         </div>
         {% endfor %}
+        {% else %}
+        <div class="sim-mol">
+            <h6><strong>No similar molecules found</strong></h6>
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>

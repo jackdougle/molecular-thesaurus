@@ -58,7 +58,6 @@ def get_info():
         new_smiles = find_similar_molecules(mol, property, formula, smiles, chembl_id)
         new_names = []
         new_imgs = []
-        print("New smiles: " + new_smiles[4])
         for i in range(len(new_smiles)):
             new_cid, new_name = get_pubchem_name(new_smiles[i])
             new_names.append(new_name)
@@ -69,7 +68,7 @@ def get_info():
         return render_template('expanded_molecule.html', image='mol.png', name=name, smiles=smiles, chembl_id=chembl_id, \
                                cid=cid, formula=formula, weight=mw, logP=logP, tpsa=tpsa, mech=mech, caption="go", \
                                 mol3D=mol3D, new_smiles=new_smiles, new_names=new_names, new_imgs=new_imgs, \
-                                    property=property)
+                                    property=property, len=len(new_smiles))
 
     return render_template('molecule.html', image='mol.png', name=name, smiles=smiles, chembl_id=chembl_id, cid=cid, \
                            formula=formula, weight=mw, logP=logP, tpsa=tpsa, mech=mech, caption="go", \
@@ -236,12 +235,12 @@ def find_similar_molecules(mol, property, formula, smiles, chembl_id):
         for id in chembl_list:
             smile = try_chembl(id)
             if smile and smile != smiles: smiles_list.append(smile)
-        return smiles_list[:10]  # Limit to first 5 similar molecules
+        return smiles_list[:8]  # Limit to first 8 similar molecules
     elif cid_list != [] and smiles_list == []:
         for id in cid_list:
             smile = cid_to_smiles(id)
             if smile and smile != smiles: smiles_list.append(smile)
-        return smiles_list[:10]
+        return smiles_list[:8]
     else:
         print("No similar molecules found")
         return ["No similar molecules found"]
