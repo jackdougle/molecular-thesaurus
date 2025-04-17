@@ -54,22 +54,33 @@
         viewer.zoomTo();
         viewer.render();
     </script>
-    </h5><strong style="color: red; font-size: 25px">--WIP | Will be finished within the week--</strong></h5>
     <form action="/molecules" method="get">
         <input type="hidden" name="molecule_id" value="{{ smiles }}">
-        <label for="property" style="font-size: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bolder;">Find similar molecules based on:</label>
+        <label for="property" style="font-size: 25px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bolder;">Find similar molecules based on:</label>
         <select class="select" name="property" id="property">
             <option class="placeholder"></option>
             <option value="formula">Molecular Formula</option>
-            <option value="structure">Molecular Structure</option>
             <option value="mw">Molecular Weight</option>
+            <!-- option value="structure">Molecular Structure</option -->
             <option value="logp">LogP/Hydrophobicity</option>
             <option value="tpsa">Topological Polar Surface Area</option>
-            {% if mech != "Not Pharmaceutical" %}
+            {% if mech != "Not Pharmacological" %}
             <option value="mechanism">Mechanism of Action</option>
             {% endif %}
         </select>
         <button class="submit" type="submit">Go</button>
     </form>
+    <h4>Molecular matches from ChEMBL:</h4>
+    <div class="flexbox2" id="sim-mols">
+        {% for i in range(4) %}
+        <div class="sim-mol">
+            <a href="/molecules?molecule_id={{ new_smiles[i] | urlencode }}">
+                <img src="{{ url_for('static', filename=new_imgs[i]) }}" class="mol-image">
+            </a>
+            <h6><strong>{{ new_names[i] }}</strong></h6>
+            <p><strong>SMILES Code:</strong> {{ new_smiles[i] }}</p>
+        </div>
+        {% endfor %}
+    </div>
 </body>
 </html>

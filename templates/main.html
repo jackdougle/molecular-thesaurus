@@ -12,8 +12,8 @@
         <img src="{{ url_for('static', filename='icon.png') }}" alt="Molecular Thesaurus Icon" class="icon">
         Thesaurus
     </h1>
-    <h3>Welcome to the Molecular Thesaurus!</h3>
-    <h2>This website can tell you the name of a molecule and help you find similar ones.</h2>
+    <h4 style="margin-bottom: 10px">Welcome to the Molecular Thesaurus!</h4>
+    <h2>This website uses many different cheminformatics toolkits and software to gather information on any entered molecule and help you find similar ones. The ChEMBL bioactive molecule database is used for finding similar molecules, so this website produces the best results when pharmacological molecules are entered. If you have any suggestions on what could be improved/added, please email me at jack.gdouglass@gmail.com!</h2>
     <h3>To get started, please enter a molecule name (IUPAC or common), ChEMBL ID, or SMILES code:</h3>
     <form id="textSearch" action="/molecules" method="get" autocomplete="on">
         <input type="text" name="molecule_id" placeholder="Molecule ID">

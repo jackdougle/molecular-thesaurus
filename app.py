@@ -57,15 +57,19 @@ def get_info():
         print(f"Finding similar molecules of property {property}...")
         new_smiles = find_similar_molecules(mol, property, formula, smiles, chembl_id)
         new_names = []
+        new_imgs = []
+        print("New smiles: " + new_smiles[4])
         for i in range(len(new_smiles)):
-            new_name = get_pubchem_name(new_smiles[i])
+            new_cid, new_name = get_pubchem_name(new_smiles[i])
             new_names.append(new_name)
             new_mol = Chem.MolFromSmiles(new_smiles[i])
             new_img_path = os.path.join('static', f'mol{i}.png')
+            new_imgs.append(f'mol{i}.png')
             Draw.MolToFile(new_mol, new_img_path)
         return render_template('expanded_molecule.html', image='mol.png', name=name, smiles=smiles, chembl_id=chembl_id, \
                                cid=cid, formula=formula, weight=mw, logP=logP, tpsa=tpsa, mech=mech, caption="go", \
-                                mol3D=mol3D, new_smiles=new_smiles, new_names=new_names)
+                                mol3D=mol3D, new_smiles=new_smiles, new_names=new_names, new_imgs=new_imgs, \
+                                    property=property)
 
     return render_template('molecule.html', image='mol.png', name=name, smiles=smiles, chembl_id=chembl_id, cid=cid, \
                            formula=formula, weight=mw, logP=logP, tpsa=tpsa, mech=mech, caption="go", \
@@ -141,39 +145,40 @@ def get_chembl_id(smiles):
     if response.status_code != 200:
         return None
     try:
-        print(response.json()['molecules'][0]['molecule_chembl_id'])
         return response.json()['molecules'][0]['molecule_chembl_id']
     except (KeyError, IndexError):
         return "No ChEMBL ID found"
 
 def get_pubchem_name(smiles):
+    formatted_smiles = urllib.parse.quote(smiles)
     # Gets the IUPAC name by first getting the PubChem CID by using the SMILES code
     # and then uses the PubChem CID to get the IUPAC name
-    cidURL = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{smiles}/cids/JSON"
+    cidURL = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{formatted_smiles}/cids/JSON"
     cidResponse = requests.get(cidURL)
 
     if cidResponse.status_code != 200:
-        print("Error fetching CID:", cidResponse.status_code, cidResponse.text)
-        return None, None
+        print("Error fetching CID:", cidResponse.text)
+        return None, "Name not found"
 
     try:
         cid = cidResponse.json()["IdentifierList"]["CID"][0]
     except (KeyError, IndexError):
-        return None, None
+        return None, "Name not found"
 
     nameURL = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{cid}/property/IUPACName/JSON"
     nameResponse = requests.get(nameURL)
 
     if nameResponse.status_code != 200:
         print("Error getting name:", nameResponse.status_code, nameResponse.text)
-        return cid, "Name not available"
+        return cid, "Unnamed compound"
+    # Check if the response contains the expected data
 
     # Even with successful response, many output names are not IUPAC (i. e. aldehydes)
     try:
         name = nameResponse.json()["PropertyTable"]["Properties"][0]["IUPACName"]
         return cid, name.capitalize()
     except (KeyError, IndexError):
-        return cid, "Name not found"
+        return cid, "Unnamed compound"
     
 def get_mechanism(id):
     url = f"https://www.ebi.ac.uk/chembl/api/data/mechanism.json?molecule_chembl_id={id}"
@@ -230,17 +235,16 @@ def find_similar_molecules(mol, property, formula, smiles, chembl_id):
         print("Found ChEMBL IDs")
         for id in chembl_list:
             smile = try_chembl(id)
-            if smile:
-                smiles_list.append(smile)
+            if smile and smile != smiles: smiles_list.append(smile)
+        return smiles_list[:5]  # Limit to first 5 similar molecules
     elif cid_list != [] and smiles_list == []:
         for id in cid_list:
             smile = cid_to_smiles(id)
-            if smile:
-                smiles_list.append(smile)
-    elif smiles_list != []:
-        if len(smiles_list) > 5: smiles_list = smiles_list[:5]
-    
-    return smiles_list[:5]  # Limit to first 5 similar molecules
+            if smile and smile != smiles: smiles_list.append(smile)
+        return smiles_list[:5]
+    else:
+        print("No similar molecules found")
+        return ["No similar molecules found"]
 
 def get_similar_formula(formula):
     print(f"Searching ChEMBL DB for formula: {formula}")
@@ -333,8 +337,6 @@ def get_similar_tpsa(mol, delta):
         return chembl_ids
     except (KeyError, IndexError):
         return None
-
-
 
 def get_similar_mechanism(chembl_id):
     print(f"Searching ChEMBL DB for mechanism of action: {chembl_id}")
