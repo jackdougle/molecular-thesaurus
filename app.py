@@ -236,12 +236,12 @@ def find_similar_molecules(mol, property, formula, smiles, chembl_id):
         for id in chembl_list:
             smile = try_chembl(id)
             if smile and smile != smiles: smiles_list.append(smile)
-        return smiles_list[:5]  # Limit to first 5 similar molecules
+        return smiles_list[:10]  # Limit to first 5 similar molecules
     elif cid_list != [] and smiles_list == []:
         for id in cid_list:
             smile = cid_to_smiles(id)
             if smile and smile != smiles: smiles_list.append(smile)
-        return smiles_list[:5]
+        return smiles_list[:10]
     else:
         print("No similar molecules found")
         return ["No similar molecules found"]

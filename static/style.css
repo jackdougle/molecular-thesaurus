@@ -297,6 +297,7 @@ input[type="text"]:focus {
     text-align: center;
     text-wrap: normal;
     max-width: 325px;
+    margin-bottom: -10px;
 }
 
 .sim-mol .mol-image {
