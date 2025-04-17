@@ -49,7 +49,7 @@ def get_info():
     logP = str(math.trunc(logP * 100) / 100)  # Round LogP to 2 decimal places
     tpsa = rdMolDescriptors.CalcTPSA(mol)
     tpsa = str(math.trunc(tpsa * 100) / 100)  # Round TPSA to 2 decimal places
-    mech = get_mechanism(id)
+    mech = get_mechanism(chembl_id)
     mol3D = get3D(mol)
 
     # WIP code for getting similar molecules
